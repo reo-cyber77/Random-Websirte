@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Random</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,800&display=swap">
+<style>
+:root{--bg:#f3e9ff;--ink:#2a1a4a;--accent:#ff5c8a;--soft:#e3d2fb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;transition:background .5s,color .5s;display:flex;flex-direction:column}
+header,main,footer{width:100%;max-width:960px;margin:0 auto;padding:1.25rem 1.5rem}
+header{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:1.1rem}
+header span{font-weight:400;opacity:.7;font-size:.95rem}
+main{flex:1;display:flex;flex-direction:column;justify-content:center;gap:2rem}
+h1{font-size:clamp(2.6rem,10vw,6.5rem);line-height:.98;letter-spacing:-.03em;font-weight:800;margin:0;max-width:14ch}
+h1 em{font-style:normal;background:var(--accent);color:var(--bg);padding:0 .15em;border-radius:.15em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.fact{font-size:clamp(1.05rem,2.4vw,1.35rem);max-width:46ch;line-height:1.5;margin:0}
+.swatches{display:flex;gap:.6rem;flex-wrap:wrap}
+.swatches button{width:3.2rem;height:3.2rem;border-radius:50%;border:2px solid var(--ink);cursor:pointer;padding:0}
+button.shuffle{align-self:flex-start;font:inherit;font-weight:800;font-size:1.15rem;background:var(--ink);color:var(--bg);border:0;border-radius:999px;padding:.9rem 1.8rem;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+button.shuffle:active{transform:scale(.96)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.card{background:var(--soft);border-radius:1rem;padding:1.1rem 1.2rem}
+.card b{display:block;margin-bottom:.3rem}
+.card p{margin:0;opacity:.85;line-height:1.4}
+footer{font-size:.9rem;opacity:.7}
+@media (prefers-reduced-motion:reduce){body{transition:none}}
+</style>
+</head>
+<body>
+<header>Random <span id="count">Shuffle #1</span></header>
+<main>
+  <h1 id="title"></h1>
+  <p class="fact" id="fact"></p>
+  <button class="shuffle" id="go" type="button">Shuffle the site</button>
+  <div class="swatches" id="sw" aria-label="Colors on this page"></div>
+  <div class="cards" id="cards"></div>
+</main>
+<footer>Every shuffle builds a new page: new colors, new headline, new ideas.</footer>
+<script>
+(function(){
+  var adj=["Wobbly","Midnight","Pocket-sized","Forgotten","Electric","Gentle","Unfinished","Backwards","Neon","Quiet","Borrowed","Giant"];
+  var noun=["lighthouse","orchestra","pancake","library","volcano","bicycle","garden","robot","comet","bakery","island","telescope"];
+  var facts=[
+    "Octopuses have three hearts, and two of them stop when they swim.",
+    "Honey found in ancient tombs was still safe to eat after thousands of years.",
+    "A day on Venus is longer than its year.",
+    "Bananas are berries, but strawberries are not.",
+    "Wombats make cube-shaped droppings.",
+    "There are more possible chess games than atoms in the observable universe.",
+    "Sharks existed before trees did.",
+    "Sound travels about four times faster in water than in air."
+  ];
+  var ideas=[
+    ["Walk a new street","Take one route you have never used today."],
+    ["Write 3 lines","Describe the room you are in, as a stranger would."],
+    ["Cook backwards","Pick a dessert and plan the meal around it."],
+    ["Call someone","Ask a friend what they are into this week."],
+    ["Draw with your other hand","Ten minutes, any subject, no erasing."],
+    ["Learn one word","Pick a language and find a word with no English match."],
+    ["Build something tiny","Fold, glue or code the smallest useful thing."],
+    ["Rearrange a shelf","Sort by color, size or mood instead of topic."]
+  ];
+  function pick(a){return a[Math.floor(Math.random()*a.length)]}
+  function shuffle(a){return a.slice().sort(function(){return Math.random()-.5})}
+  var n=0,root=document.documentElement;
+  function hsl(h,s,l){return "hsl("+Math.round(h)+" "+s+"% "+l+"%)"}
+  function render(){
+    n++;
+    var h=Math.random()*360,dark=Math.random()<.4;
+    var bg=dark?hsl(h,35,12):hsl(h,70,93);
+    var ink=dark?hsl(h,60,92):hsl(h,55,14);
+    var accent=hsl((h+150+Math.random()*60)%360,85,dark?62:42);
+    var soft=dark?hsl(h,30,20):hsl(h,60,86);
+    root.style.setProperty("--bg",bg);root.style.setProperty("--ink",ink);
+    root.style.setProperty("--accent",accent);root.style.setProperty("--soft",soft);
+    document.getElementById("title").innerHTML=pick(adj)+" <em>"+pick(noun)+"</em>";
+    document.getElementById("fact").textContent=pick(facts);
+    document.getElementById("count").textContent="Shuffle #"+n;
+    var sw=document.getElementById("sw");sw.innerHTML="";
+    [bg,ink,accent,soft].forEach(function(c){
+      var b=document.createElement("button");b.type="button";b.style.background=c;
+      b.setAttribute("aria-label","Copy color "+c);
+      b.onclick=function(){try{navigator.clipboard.writeText(c)}catch(e){}};
+      sw.appendChild(b);
+    });
+    var cards=document.getElementById("cards");cards.innerHTML="";
+    shuffle(ideas).slice(0,3).forEach(function(i){
+      var d=document.createElement("div");d.className="card";
+      d.innerHTML="<b></b><p></p>";d.firstChild.textContent=i[0];d.lastChild.textContent=i[1];
+      cards.appendChild(d);
+    });
+  }
+  document.getElementById("go").onclick=render;
+  render();
+})();
+</script>
+</body>
+</html>
